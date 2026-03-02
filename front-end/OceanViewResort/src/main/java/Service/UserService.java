@@ -54,13 +54,9 @@ public class UserService {
      * @return List of UserDTOs; returns empty list if request fails
      */
     public List<UserDTO> getAllUsers() {
-        try {
-            ApiResponse<UserDTO[]> response = client.get(BASE_URL + "/all", UserDTO[].class);
-            if (response.getStatus() == 200 && response.getData() != null) {
-                return Arrays.asList(response.getData());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        ApiResponse<UserDTO[]> response = client.get(BASE_URL + "/all", UserDTO[].class);
+        if (response.getStatus() == 200 && response.getData() != null) {
+            return Arrays.asList(response.getData());
         }
         return List.of(); // Return empty list if request fails
     }
@@ -73,12 +69,8 @@ public class UserService {
      * @return UserDTO if found; null if user does not exist or request fails
      */
     public UserDTO findUserByEmail(String email) {
-        try {
-            ApiResponse<UserDTO> response = client.get(BASE_URL + "/email/" + email, UserDTO.class);
-            if (response.getStatus() == 200) return response.getData();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ApiResponse<UserDTO> response = client.get(BASE_URL + "/email/" + email, UserDTO.class);
+        if (response.getStatus() == 200) return response.getData();
         return null; // Return null if user not found or request fails
     }
 
@@ -90,13 +82,8 @@ public class UserService {
      * @return true if the operation succeeds; false otherwise
      */
     public boolean approveUser(String email) {
-        try {
-            ApiResponse<String> response = client.post(BASE_URL + "/approve", new EmailRequest(email), String.class);
-            return response.getStatus() == 200;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+        ApiResponse<String> response = client.post(BASE_URL + "/approve", new EmailRequest(email), String.class);
+        return response.getStatus() == 200;
     }
 
     // ===== DISAPPROVE USER =====
@@ -107,13 +94,8 @@ public class UserService {
      * @return true if the operation succeeds; false otherwise
      */
     public boolean disapproveUser(String email) {
-        try {
-            ApiResponse<String> response = client.post(BASE_URL + "/disapprove", new EmailRequest(email), String.class);
-            return response.getStatus() == 200;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+        ApiResponse<String> response = client.post(BASE_URL + "/disapprove", new EmailRequest(email), String.class);
+        return response.getStatus() == 200;
     }
 
     // ===== GET SECURITY QUESTION =====
@@ -124,12 +106,8 @@ public class UserService {
      * @return Security question string if found; null if not found or request fails
      */
     public String getSecurityQuestion(String email) {
-        try {
-            ApiResponse<String> response = client.get(BASE_URL + "/forget-email/" + email, String.class);
-            if (response.getStatus() == 200) return response.getData();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ApiResponse<String> response = client.get(BASE_URL + "/forget-email/" + email, String.class);
+        if (response.getStatus() == 200) return response.getData();
         return null; // Return null if not found or request fails
     }
 
