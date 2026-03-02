@@ -1,0 +1,52 @@
+# ==============================
+# General OS / IDE / Build files
+# ==============================
+.DS_Store
+Thumbs.db
+
+# ==============================
+# IntelliJ IDEA
+# ==============================
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# ==============================
+# Eclipse
+# ==============================
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+
+# ==============================
+# NetBeans
+# ==============================
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+/build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ==============================
+# VS Code
+# ==============================
+.vscode/
+
+# ==============================
+# Maven target folders
+# ==============================
+**/target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# ==============================
+# Front-end (NetBeans) build folders
+# ==============================
+/front-end/OceanViewResort/build/
