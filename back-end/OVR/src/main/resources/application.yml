@@ -19,3 +19,9 @@ server:
 jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION}
+
+
+twilio:
+  accountSid: ${SID}
+  authToken: ${AUTH_TOKEN}
+  fromNumber: ${PHONE_NUMBER}

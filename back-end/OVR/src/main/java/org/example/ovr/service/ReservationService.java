@@ -16,7 +16,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
-
 @Service
 public class ReservationService {
 
@@ -27,8 +26,10 @@ public class ReservationService {
     private RoomRepository roomRepository;
 
     @Autowired
-    private BillService billService; // Inject BillService
+    private BillService billService;
 
+    @Autowired
+    private SmsService smsService; // Inject SMS service
 
     @Transactional
     public Reservation addReservation(ReservationDTO dto) {
@@ -71,9 +72,24 @@ public class ReservationService {
         // 5️⃣ Generate Bill
         generateBillForReservation(reservation, room);
 
+        // ✅ Send SMS and handle failure
+        if (dto.getPhoneNumber() != null && !dto.getPhoneNumber().isBlank()) {
+            String message = "Hi " + dto.getCustomerName() + ", your reservation (ID: "
+                    + reservation.getId() + ") is confirmed from "
+                    + dto.getCheckIn().toLocalDate() + " to "
+                    + dto.getCheckOut().toLocalDate() + ". Thank you!";
+            try {
+                smsService.sendSms(dto.getPhoneNumber(), message);
+            } catch (Exception e) {
+                // Show message in console or throw to API layer
+                System.err.println("⚠️ SMS could not be sent: " + e.getMessage());
+                // Optional: throw to stop reservation creation if you want
+                // throw new RuntimeException("Reservation created but SMS failed: " + e.getMessage());
+            }
+        }
+
         return reservation;
     }
-
 
     private void generateBillForReservation(Reservation reservation, Room room) {
         try {
@@ -81,7 +97,7 @@ public class ReservationService {
                     reservation.getCheckOut().toLocalDate());
             if (numberOfDays == 0) numberOfDays = 1; // Minimum 1 day
 
-            double roomPrice = room.getPrice(); // Room price from Room entity
+            double roomPrice = room.getPrice();
             double totalAmount = roomPrice * numberOfDays;
 
             Bill bill = new Bill();
@@ -92,7 +108,7 @@ public class ReservationService {
             bill.setTotalAmount(totalAmount);
             bill.setCreatedDate(LocalDateTime.now());
 
-            // Save bill first
+            // Save bill
             Bill savedBill = billService.saveBill(bill);
 
             // Generate PDF
@@ -106,7 +122,6 @@ public class ReservationService {
         }
     }
 
-
     public List<Reservation> getAllReservations() {
         return reservationRepository.findAll();
     }
@@ -115,7 +130,6 @@ public class ReservationService {
         return reservationRepository.findById(id);
     }
 
-
     public List<ReservationDTO> searchByDate(LocalDate date) {
         return reservationRepository
                 .findByCheckInBetween(date.atStartOfDay(), date.atTime(23, 59, 59))
@@ -123,7 +137,6 @@ public class ReservationService {
                 .map(this::convertToDTO)
                 .toList();
     }
-
 
     @Transactional
     public void deleteReservation(Long id) {
@@ -137,7 +150,7 @@ public class ReservationService {
         room.setAvailable("Available");
         roomRepository.save(room);
 
-        // Optional: delete bills associated with this reservation
+        // Delete bills
         billService.getBillsByReservationId(reservation.getId())
                 .forEach(bill -> billService.deleteBill(bill.getId()));
 
@@ -159,26 +172,21 @@ public class ReservationService {
         return dto;
     }
 
-
     @Transactional
     public void checkOutReservation(Long id) {
-
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reservation not found"));
 
-        // ✅ Prevent multiple checkouts
         if ("CHECKED_OUT".equals(reservation.getStatus())) {
             throw new RuntimeException("Customer already checked out");
         }
 
-        Room room = reservation.getRoom(); // get the room from reservation
+        Room room = reservation.getRoom();
 
-        // Update room status
         room.setAvailable("Available");
-        room.setCheckStatus("DIRTY"); // room becomes dirty after checkout
+        room.setCheckStatus("DIRTY");
         roomRepository.save(room);
 
-        // Update reservation status
         reservation.setStatus("CHECKED_OUT");
         reservationRepository.save(reservation);
     }
