@@ -155,6 +155,7 @@ This project follows semantic versioning:
 | Version  | Description                     |
 |----------|---------------------------------|
 | v1.0.0   | Initial release of the system    |
+| v1.1.0   |Added server-down dialog & improved login handling    |
 
 
 ---
