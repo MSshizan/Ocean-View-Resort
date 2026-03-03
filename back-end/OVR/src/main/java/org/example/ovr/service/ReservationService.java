@@ -52,7 +52,7 @@ public class ReservationService {
             throw new RuntimeException("Room is already booked!");
         }
 
-        // Create reservation and set Room
+// 3️⃣ Create reservation fully populated BEFORE saving
         Reservation reservation = new Reservation();
         reservation.setCustomerName(dto.getCustomerName());
         reservation.setPhoneNumber(dto.getPhoneNumber());
@@ -63,7 +63,10 @@ public class ReservationService {
         reservation.setCheckIn(dto.getCheckIn());
         reservation.setCheckOut(dto.getCheckOut());
         reservation.setRoom(room);
-        reservationRepository.save(reservation);
+
+        // 4️⃣ Save reservation (ID will be generated)
+        Reservation savedReservation = reservationRepository.save(reservation);
+
 
         // 4️⃣ Update room status
         room.setAvailable("Booked");
@@ -88,7 +91,7 @@ public class ReservationService {
             }
         }
 
-        return reservation;
+        return savedReservation;
     }
 
     private void generateBillForReservation(Reservation reservation, Room room) {
@@ -115,7 +118,7 @@ public class ReservationService {
             billService.generateBillPdf(savedBill);
 
             // Update bill with PDF path
-            billService.saveBill(savedBill);
+            //billService.saveBill(savedBill);
 
         } catch (Exception e) {
             e.printStackTrace();
