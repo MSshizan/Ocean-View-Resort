@@ -157,7 +157,8 @@ This project follows semantic versioning:
 | v1.0.0   | Initial release of the system    |
 | v1.1.0   |Added server-down dialog & improved login handling    |
 | v1.2.0   | Addes Twilio SMS service with secrets removed    |
-| v1.4.0   | "Release version V1.4.0: added new features and bug fixes    |
+| v1.4.0   | Release version V1.4.0: added new features and bug fixes    |
+| v1.5.0   | Release version 1.5.0: added new features and bug fixes   |
 
 
 ---
