@@ -11,31 +11,36 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-/**
- * Modern Add Room Panel with Full Backend Logic + Light Blue Header
- */
 public class EmbeddedAddRoomProAdvanced extends JPanel {
 
-    private JTextField roomNumField;
-    private JComboBox<String> availableCombo;
-    private JComboBox<String> checkStatusCombo;
-    private JComboBox<String> bedTypeCombo;
-    private JTextArea descriptionArea;
-    private JTextField priceField;
-    private JButton addButton;
+    private final RoomService roomService;
 
+    JTextField roomNumField;
+    JComboBox<String> availableCombo;
+    JComboBox<String> checkStatusCombo;
+    JComboBox<String> bedTypeCombo;
+    JTextArea descriptionArea;
+    JTextField priceField;
+    JButton addButton;
+
+    // ===== Constructor with DI =====
+    public EmbeddedAddRoomProAdvanced(RoomService roomService) {
+        this.roomService = roomService;
+        initComponents();
+    }
+
+    // Default constructor uses singleton
     public EmbeddedAddRoomProAdvanced() {
-        // ===== Ensure FlatLaf is applied =====
-        try {
-            UIManager.setLookAndFeel(new FlatLightLaf());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        this(RoomService.getInstance());
+    }
+
+    private void initComponents() {
+        try { UIManager.setLookAndFeel(new FlatLightLaf()); } catch (Exception ignored) {}
 
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(650, 650));
 
-        // ===== HEADER ===== (Light Blue Gradient)
+        // ===== HEADER =====
         JPanel header = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -58,7 +63,7 @@ public class EmbeddedAddRoomProAdvanced extends JPanel {
         header.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(header, BorderLayout.NORTH);
 
-        // ===== CONTENT PANEL =====
+        // ===== CONTENT =====
         JPanel content = new JPanel(new GridBagLayout());
         content.setBorder(new EmptyBorder(20, 40, 20, 40));
         GridBagConstraints gbc = new GridBagConstraints();
@@ -67,20 +72,29 @@ public class EmbeddedAddRoomProAdvanced extends JPanel {
 
         int row = 0;
 
+        // ===== Room Number =====
         addLabel("Room Number", row, gbc, content);
         roomNumField = addTextField(row++, gbc, content);
+        roomNumField.setName("roomNumField");
 
+        // ===== Available =====
         addLabel("Available", row, gbc, content);
         availableCombo = addComboBox(new String[]{"Available", "Not Available"}, row++, gbc, content);
+        availableCombo.setName("availableCombo");
 
+        // ===== Check Status =====
         addLabel("Check Status", row, gbc, content);
         checkStatusCombo = addComboBox(new String[]{"Clean", "Dirty"}, row++, gbc, content);
+        checkStatusCombo.setName("checkStatusCombo");
 
+        // ===== Bed Type =====
         addLabel("Bed Type", row, gbc, content);
         bedTypeCombo = addComboBox(
                 new String[]{"Twin bed", "Single bed", "Double bed", "Queen bed", "King bed", "California king bed"},
                 row++, gbc, content);
+        bedTypeCombo.setName("bedTypeCombo");
 
+        // ===== Description =====
         addLabel("Description", row, gbc, content);
         descriptionArea = new JTextArea(3, 20);
         descriptionArea.setLineWrap(true);
@@ -89,12 +103,15 @@ public class EmbeddedAddRoomProAdvanced extends JPanel {
                 BorderFactory.createLineBorder(new Color(150, 150, 150), 1, true),
                 BorderFactory.createEmptyBorder(6, 6, 6, 6)
         ));
+        descriptionArea.setName("descriptionArea"); // <<<<<< Name set
         gbc.gridx = 1;
         gbc.gridy = row++;
         content.add(descriptionArea, gbc);
 
+        // ===== Price =====
         addLabel("Price", row, gbc, content);
         priceField = addTextField(row++, gbc, content);
+        priceField.setName("priceField");
 
         // ===== ADD BUTTON =====
         addButton = new JButton("ADD");
@@ -103,12 +120,11 @@ public class EmbeddedAddRoomProAdvanced extends JPanel {
         addButton.setFont(new Font("Segoe UI", Font.BOLD, 16));
         addButton.setFocusPainted(false);
         addButton.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
+        addButton.setName("addButton"); // <<<<<< Name set
 
         addButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) { addButton.setBackground(new Color(0, 150, 255)); }
-            @Override
-            public void mouseExited(MouseEvent e) { addButton.setBackground(new Color(0, 120, 255)); }
+            @Override public void mouseEntered(MouseEvent e) { addButton.setBackground(new Color(0, 150, 255)); }
+            @Override public void mouseExited(MouseEvent e) { addButton.setBackground(new Color(0, 120, 255)); }
         });
 
         gbc.gridx = 1;
@@ -118,7 +134,7 @@ public class EmbeddedAddRoomProAdvanced extends JPanel {
 
         add(content, BorderLayout.CENTER);
 
-        // ===== BUTTON ACTION: Full Add Room Logic =====
+        // ===== ACTION =====
         addButton.addActionListener(e -> addRoomAction());
     }
 
@@ -132,7 +148,7 @@ public class EmbeddedAddRoomProAdvanced extends JPanel {
             dto.setDescription(descriptionArea.getText());
             dto.setPrice(Double.parseDouble(priceField.getText()));
 
-            ApiResponse<RoomDTO> response = RoomService.getInstance().addRoom(dto);
+            ApiResponse<RoomDTO> response = roomService.addRoom(dto);
 
             if (response.getStatus() == 200) {
                 JOptionPane.showMessageDialog(this, "Room added successfully!");

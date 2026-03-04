@@ -12,19 +12,19 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
-/**
- * Professional Rooms Panel with FlatLaf design
- */
+
 public class EmbeddedRoomsProAdvanced extends JPanel {
 
     private final JTable roomTable;
     private final DefaultTableModel tableModel;
     private final JComboBox<String> bedTypeCombo;
     private final JCheckBox onlyAvailableCheck;
-    
-    private final RoomService roomService = RoomService.getInstance();
 
-    public EmbeddedRoomsProAdvanced() {
+    private final RoomService roomService;
+
+    // ===== Constructor with DI for testing =====
+    public EmbeddedRoomsProAdvanced(RoomService roomService) {
+        this.roomService = roomService;
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
 
@@ -43,7 +43,7 @@ public class EmbeddedRoomsProAdvanced extends JPanel {
         };
         header.setPreferredSize(new Dimension(1200, 80));
         header.setLayout(new GridBagLayout());
-        JLabel title = new JLabel("Rooms Deatils");
+        JLabel title = new JLabel("Rooms Details");
         title.setFont(new Font("Segoe UI", Font.BOLD, 32));
         title.setForeground(Color.WHITE);
         header.add(title);
@@ -55,13 +55,11 @@ public class EmbeddedRoomsProAdvanced extends JPanel {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
         };
-
         roomTable = new JTable(tableModel);
         roomTable.setRowHeight(28);
         roomTable.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         roomTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
 
-        // Center table cells
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
         for (int i = 0; i < roomTable.getColumnCount(); i++) {
@@ -82,8 +80,9 @@ public class EmbeddedRoomsProAdvanced extends JPanel {
 
         JLabel bedTypeLabel = new JLabel("Room Bed Type:");
         bedTypeLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        // Empty string = no bed type filter
         bedTypeCombo = new JComboBox<>(new String[]{
-                "Twin bed", "Single bed", "Double bed", "Queen bed", "King bed", "California king bed"
+                 "Twin bed", "Single bed", "Double bed", "Queen bed", "King bed", "California king bed"
         });
         bedTypeCombo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         bedTypeCombo.addActionListener(e -> applyFilters());
@@ -96,34 +95,43 @@ public class EmbeddedRoomsProAdvanced extends JPanel {
         filterPanel.add(bedTypeLabel);
         filterPanel.add(bedTypeCombo);
         filterPanel.add(onlyAvailableCheck);
-
         add(filterPanel, BorderLayout.SOUTH);
 
         // ===== LOAD DATA =====
         loadAllRooms();
     }
 
+    // Default constructor uses singleton
+    public EmbeddedRoomsProAdvanced() {
+        this(RoomService.getInstance());
+    }
+
     private void loadAllRooms() {
         tableModel.setRowCount(0);
         ApiResponse<List<RoomDTO>> response = roomService.getAllRooms();
         List<RoomDTO> rooms = response.getData();
-        if (rooms != null) {
-            updateTable(rooms);
-        }
+        if (rooms != null) updateTable(rooms);
     }
 
-    private void applyFilters() {
-        ApiResponse<List<RoomDTO>> response = roomService.getAllRooms();
-        List<RoomDTO> rooms = response.getData();
-        if (rooms == null) return;
+   private void applyFilters() {
+    ApiResponse<List<RoomDTO>> response = roomService.getAllRooms();
+    List<RoomDTO> rooms = response.getData();
+    if (rooms == null) return;
 
-        String selectedBedType = bedTypeCombo.getSelectedItem().toString();
-        boolean onlyAvailable = onlyAvailableCheck.isSelected();
-
-        List<RoomDTO> filtered = roomService.filterRooms(rooms,
-                "All".equals(selectedBedType) ? null : selectedBedType, onlyAvailable);
-        updateTable(filtered);
+    String selectedBedType = (String) bedTypeCombo.getSelectedItem();
+    if (selectedBedType == null || selectedBedType.isEmpty()) {
+        selectedBedType = null; // no bed type filter
     }
+
+    boolean onlyAvailable = onlyAvailableCheck.isSelected();
+
+    List<RoomDTO> filtered = roomService.filterRooms(
+            rooms,
+            selectedBedType,
+            onlyAvailable
+    );
+    updateTable(filtered);
+}
 
     private void updateTable(List<RoomDTO> rooms) {
         tableModel.setRowCount(0);
@@ -139,5 +147,9 @@ public class EmbeddedRoomsProAdvanced extends JPanel {
         }
     }
 
-  
+    // ===== GETTERS for testing =====
+    public JTable getRoomTable() { return roomTable; }
+    public JComboBox<String> getBedTypeCombo() { return bedTypeCombo; }
+    public JCheckBox getOnlyAvailableCheck() { return onlyAvailableCheck; }
+    public RoomService getRoomService() { return roomService; }
 }

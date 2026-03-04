@@ -21,6 +21,7 @@ import java.util.List;
 /**
  * Professional Reservation Panel with FlatLaf design
  */
+
 public class EmbeddedReservationsProAdvanced extends JPanel {
 
     private final JTable reservationTable;
@@ -29,7 +30,8 @@ public class EmbeddedReservationsProAdvanced extends JPanel {
     private final JButton searchButton;
     private final JButton clearButton;
 
-    private final ReservationService reservationService = ReservationService.getInstance();
+    // ✅ Make service non-final so we can inject mock
+    private ReservationService reservationService = ReservationService.getInstance();
     private List<ReservationDTO> reservationList;
 
     public EmbeddedReservationsProAdvanced() {
@@ -132,7 +134,8 @@ public class EmbeddedReservationsProAdvanced extends JPanel {
         });
     }
 
-    private void loadAllReservations() {
+    // ✅ Made package-private for testing
+   public void loadAllReservations() {
         var response = reservationService.getAllReservations();
         if (response.getData() != null) {
             reservationList = response.getData();
@@ -195,15 +198,16 @@ public class EmbeddedReservationsProAdvanced extends JPanel {
         }
     }
 
-    // ===== TEST STANDALONE =====
-    public static void main(String[] args) {
-        try { UIManager.setLookAndFeel(new FlatLightLaf()); } catch (Exception e) { e.printStackTrace(); }
+    // =========================
+    // ✅ Public getters for testing
+    // =========================
+    public JTable getReservationTable() { return reservationTable; }
+    public DatePicker getDatePicker() { return datePicker; }
+    public JButton getSearchButton() { return searchButton; }
+    public JButton getClearButton() { return clearButton; }
 
-        JFrame frame = new JFrame("Check Reservations");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1400, 800);
-        frame.setLocationRelativeTo(null);
-        frame.add(new EmbeddedReservationsProAdvanced());
-        frame.setVisible(true);
+    // ✅ Setter for injecting mock service in tests
+    public void setReservationService(ReservationService service) {
+        this.reservationService = service;
     }
 }

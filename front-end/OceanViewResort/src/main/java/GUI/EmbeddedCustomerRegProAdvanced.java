@@ -15,6 +15,7 @@ import java.io.File;
 import java.net.URI;
 import java.time.LocalDateTime;
 
+
 public class EmbeddedCustomerRegProAdvanced extends JPanel {
 
     private JTextField idNumberField, nameField, countryField, roomNumberField, phoneField;
@@ -153,6 +154,20 @@ public class EmbeddedCustomerRegProAdvanced extends JPanel {
 
         add(content, BorderLayout.CENTER);
 
+        // ===== SET NAMES FOR ASSERTJ TESTING =====
+        idTypeCombo.setName("idTypeCombo");
+        idNumberField.setName("idNumberField");
+        nameField.setName("nameField");
+        maleRadio.setName("maleRadio");
+        femaleRadio.setName("femaleRadio");
+        countryField.setName("countryField");
+        roomNumberField.setName("roomNumberField");
+        phoneField.setName("phoneField");
+        checkInPicker.setName("checkInPicker");
+        checkOutPicker.setName("checkOutPicker");
+        saveButton.setName("saveButton");
+        clearButton.setName("clearButton");
+
         // ===== ACTIONS =====
         saveButton.addActionListener(e -> saveCustomer());
         clearButton.addActionListener(e -> clearAllFields());
@@ -253,10 +268,8 @@ public class EmbeddedCustomerRegProAdvanced extends JPanel {
                 if (billPdfUrl != null && !billPdfUrl.isEmpty()) {
                     try {
                         if (billPdfUrl.startsWith("http")) {
-                            // Open remote URL
                             java.awt.Desktop.getDesktop().browse(new URI(billPdfUrl));
                         } else {
-                            // Open local PDF file
                             File file = new File(billPdfUrl);
                             if (file.exists()) {
                                 java.awt.Desktop.getDesktop().open(file);

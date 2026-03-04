@@ -38,11 +38,17 @@ public class RoomService {
     // Base URL for room-related API endpoints
     private static final String BASE_URL = ApiConfig.BASE_URL + "/rooms";
 
+    // For Testing Purpose
+    public static void setInstance(RoomService service) {
+    instance = service;
+}
+    
+    
     // HTTP client with automatic JWT support
     private final HttpClientWithJwt client = new HttpClientWithJwt();
 
     // Private constructor for singleton pattern
-    private RoomService() {}
+     public RoomService() {}
 
     /**
      * Returns the singleton instance of RoomService.
